@@ -17,7 +17,7 @@ export const getGeminiRecommendations = async (
 
   // Incluimos la URL en el contexto para que Gemini la conozca
   const resourcesContext = availableResources
-    .map((r) => `- ${r.title} (${r.category}): ${r.description}. URL: ${r.url}`)
+    .map((r) => `- ${r.title} (${r.categories.join(', ')}): ${r.description}. URL: ${r.url}`)
     .join("\n");
 
   const prompt = `

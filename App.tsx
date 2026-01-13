@@ -78,14 +78,19 @@ const MainApp: React.FC = () => {
 
   // Filter Logic
   const filteredResources = useMemo(() => {
-    return resources.filter((resource) => {
-      const matchesCategory = activeCategory === 'Todos' || resource.category === activeCategory;
-      const matchesSearch =
-        resource.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        resource.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        resource.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()));
+    return resources.filter(resource => {
+      // 1. Filter by Category (Multi-category support)
+      const resourceCategories = resource.categories || [(resource as any).category].filter(Boolean);
+      const categoryMatch = activeCategory === 'Todos' || resourceCategories.includes(activeCategory);
 
-      return matchesCategory && matchesSearch;
+      // 2. Filter by Search Term
+      const searchLower = searchTerm.toLowerCase();
+      const textMatch =
+        resource.title.toLowerCase().includes(searchLower) ||
+        resource.description.toLowerCase().includes(searchLower) ||
+        resource.tags.some(tag => tag.toLowerCase().includes(searchLower));
+
+      return categoryMatch && textMatch;
     });
   }, [activeCategory, searchTerm, resources]);
 

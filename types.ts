@@ -5,7 +5,7 @@ export interface Resource {
   title: string;
   description: string;
   url: string;
-  category: Category;
+  categories: Category[];
   tags: string[];
   imageUrl: string;
   featured?: boolean;

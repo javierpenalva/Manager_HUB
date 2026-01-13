@@ -20,27 +20,50 @@ const AddResourceModal: React.FC<AddResourceModalProps> = ({ isOpen, onClose, on
     title: '',
     description: '',
     url: '',
-    category: 'IA Generativa' as Category,
+    categories: [] as Category[],
     tags: '',
     imageUrl: ''
   });
 
   useEffect(() => {
     if (initialData) {
+      // Legacy compatibility: check if it has 'categories' (new) or 'category' (old)
+      const loadedCategories = initialData.categories && initialData.categories.length > 0
+        ? initialData.categories
+        : (initialData as any).category ? [(initialData as any).category] : [];
+
       setFormData({
         title: initialData.title,
         description: initialData.description,
         url: initialData.url,
-        category: initialData.category,
+        categories: loadedCategories,
         tags: initialData.tags.join(', '),
         imageUrl: initialData.imageUrl
       });
     } else {
-      setFormData({ title: '', description: '', url: '', category: 'IA Generativa', tags: '', imageUrl: '' });
+      setFormData({
+        title: '',
+        description: '',
+        url: '',
+        categories: [],
+        tags: '',
+        imageUrl: ''
+      });
     }
   }, [initialData, isOpen]);
 
   if (!isOpen) return null;
+
+  const toggleCategory = (cat: Category) => {
+    setFormData(prev => {
+      const isSelected = prev.categories.includes(cat);
+      if (isSelected) {
+        return { ...prev, categories: prev.categories.filter(c => c !== cat) };
+      } else {
+        return { ...prev, categories: [...prev.categories, cat] };
+      }
+    });
+  };
 
   const handleGenerateImage = async () => {
     if (!formData.title && !formData.description) return;
@@ -71,11 +94,14 @@ const AddResourceModal: React.FC<AddResourceModalProps> = ({ isOpen, onClose, on
     // Fallback if empty
     const finalImage = formData.imageUrl || `https://picsum.photos/400/200?random=${Math.random()}`;
 
+    // Ensure at least one category
+    const finalCategories = formData.categories.length > 0 ? formData.categories : ['Educación' as Category];
+
     await onSave({
       title: formData.title,
       description: formData.description,
       url: formData.url,
-      category: formData.category,
+      categories: finalCategories,
       tags: tagsArray,
       imageUrl: finalImage,
       featured: initialData?.featured || false
@@ -84,8 +110,6 @@ const AddResourceModal: React.FC<AddResourceModalProps> = ({ isOpen, onClose, on
     onClose();
   };
 
-  const isEditMode = !!initialData;
-
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 overflow-y-auto">
       <div className="fixed inset-0 bg-slate-900/70 backdrop-blur-sm" onClick={onClose} />
@@ -93,8 +117,8 @@ const AddResourceModal: React.FC<AddResourceModalProps> = ({ isOpen, onClose, on
       <div className="relative bg-white rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
         <div className="bg-slate-50 border-b border-slate-100 p-4 flex justify-between items-center">
           <h3 className="font-bold text-slate-800 flex items-center gap-2">
-            {isEditMode ? <Wand2 size={18} className="text-indigo-600" /> : <Plus size={18} className="text-indigo-600" />}
-            {isEditMode ? 'Editar Recurso' : 'Nuevo Recurso'}
+            {!!initialData ? <Wand2 size={18} className="text-indigo-600" /> : <Plus size={18} className="text-indigo-600" />}
+            {!!initialData ? 'Editar Recurso' : 'Nuevo Recurso'}
           </h3>
           <button onClick={onClose} className="text-slate-400 hover:text-slate-600 p-1">
             <X size={20} />
@@ -131,7 +155,7 @@ const AddResourceModal: React.FC<AddResourceModalProps> = ({ isOpen, onClose, on
                 className="flex items-center justify-center gap-2 text-slate-500 hover:text-indigo-600 text-sm font-medium py-2 transition-colors"
               >
                 <Ghost size={16} />
-                Usar Modo Invitado (Sin Google)
+                Usar Modo Invitado
               </button>
             </div>
           </div>
@@ -141,12 +165,24 @@ const AddResourceModal: React.FC<AddResourceModalProps> = ({ isOpen, onClose, on
               <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Título</label>
               <input required type="text" className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="Nombre de la web" value={formData.title} onChange={e => setFormData({ ...formData, title: e.target.value })} />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4">
               <div>
-                <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Categoría</label>
-                <select className="w-full px-4 py-2 border border-slate-200 rounded-xl bg-white outline-none" value={formData.category} onChange={e => setFormData({ ...formData, category: e.target.value as Category })}>
-                  {categories.map(c => <option key={c} value={c}>{c}</option>)}
-                </select>
+                <label className="block text-xs font-bold text-slate-500 uppercase mb-2">Categorías</label>
+                <div className="flex flex-wrap gap-2">
+                  {categories.map(c => (
+                    <button
+                      key={c}
+                      type="button"
+                      onClick={() => toggleCategory(c)}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all ${formData.categories.includes(c)
+                        ? 'bg-indigo-600 text-white border-indigo-600'
+                        : 'bg-white text-slate-600 border-slate-200 hover:border-indigo-300'
+                        }`}
+                    >
+                      {c}
+                    </button>
+                  ))}
+                </div>
               </div>
               <div>
                 <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Enlace</label>
@@ -174,7 +210,7 @@ const AddResourceModal: React.FC<AddResourceModalProps> = ({ isOpen, onClose, on
                   onClick={handleGenerateImage}
                   disabled={isGeneratingImage || (!formData.title && !formData.description)}
                   className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-3 py-2 rounded-xl shadow-md hover:opacity-90 disabled:opacity-50 transition-all flex items-center gap-2 text-xs font-bold whitespace-nowrap"
-                  title="Generar imagen automáticamente con IA basada en título y descripción"
+                  title="Generar imagen automáticamente con IA"
                 >
                   {isGeneratingImage ? <Loader2 size={16} className="animate-spin" /> : <Sparkles size={16} />}
                   IA Auto
@@ -195,7 +231,7 @@ const AddResourceModal: React.FC<AddResourceModalProps> = ({ isOpen, onClose, on
             <div className="pt-4 flex gap-3">
               <button type="button" onClick={onClose} className="flex-1 px-4 py-3 text-slate-600 bg-slate-100 rounded-xl font-bold">Cancelar</button>
               <button type="submit" className="flex-1 px-4 py-3 text-white bg-indigo-600 rounded-xl font-bold shadow-lg">
-                {isEditMode ? 'Guardar Cambios' : 'Añadir Recurso'}
+                {!!initialData ? 'Guardar Cambios' : 'Añadir Recurso'}
               </button>
             </div>
           </form>
