@@ -9,7 +9,7 @@ import UserMenu from './components/UserMenu';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { subscribeToResources, addResourceToDB, updateResourceInDB, deleteResourceFromDB, isFirebaseReady } from './services/firebase';
 
-const categories: Category[] = ['Todos', 'IA Generativa', 'Diseño', 'Multimedia', 'VR/AR', 'Simulaciones', 'Impresión 3D'];
+const categories: Category[] = ['Todos', 'IA Generativa', 'Diseño', 'Multimedia', 'VR/AR', 'Simulaciones', 'Impresión 3D', 'Educación', 'Menores y TIC', 'Herramientas TIC', 'Banco de Recursos'];
 
 const MainApp: React.FC = () => {
   const { isAdmin, user, signIn } = useAuth();
@@ -149,8 +149,8 @@ const MainApp: React.FC = () => {
 
         {/* Category Navigation */}
         <div className="flex justify-center mb-12">
-          <div className="bg-white/90 backdrop-blur-md p-2 rounded-2xl shadow-xl border border-white/50 overflow-x-auto max-w-full no-scrollbar">
-            <div className="flex space-x-2 min-w-max">
+          <div className="bg-white/90 backdrop-blur-md p-4 rounded-3xl shadow-xl border border-white/50 w-full max-w-5xl mx-auto">
+            <div className="flex flex-wrap justify-center gap-2">
               {categories.map((category) => (
                 <button
                   key={category}
