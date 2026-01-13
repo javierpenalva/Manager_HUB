@@ -7,16 +7,20 @@ import Concierge from './components/Concierge';
 import AddResourceModal from './components/AddResourceModal';
 import UserMenu from './components/UserMenu';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
-import { subscribeToResources, addResourceToDB, deleteResourceFromDB, isFirebaseReady } from './services/firebase';
+import { subscribeToResources, addResourceToDB, updateResourceInDB, deleteResourceFromDB, isFirebaseReady } from './services/firebase';
 
-const categories: Category[] = ['Todos', 'IA Generativa', 'Diseño', 'Productividad', 'Evaluación', 'Multimedia'];
+const categories: Category[] = ['Todos', 'IA Generativa', 'Diseño', 'Multimedia', 'VR/AR', 'Simulaciones', 'Impresión 3D'];
 
 const MainApp: React.FC = () => {
   const { isAdmin, user, signIn } = useAuth();
   const [resources, setResources] = useState<Resource[]>([]);
   const [activeCategory, setActiveCategory] = useState<Category>('Todos');
   const [searchTerm, setSearchTerm] = useState('');
+  
+  // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingResource, setEditingResource] = useState<Resource | null>(null);
+  
   const [isLoadingData, setIsLoadingData] = useState(true);
   const [isSeeding, setIsSeeding] = useState(false);
 
@@ -30,11 +34,22 @@ const MainApp: React.FC = () => {
   }, []);
 
   const handleAddClick = () => {
+    setEditingResource(null);
     setIsModalOpen(true);
   };
 
-  const handleAddResource = async (newResource: Omit<Resource, 'id'>) => {
-    await addResourceToDB(newResource);
+  const handleEditClick = (resource: Resource) => {
+    setEditingResource(resource);
+    setIsModalOpen(true);
+  };
+
+  const handleSaveResource = async (resourceData: Omit<Resource, 'id'>) => {
+    if (editingResource) {
+      await updateResourceInDB(editingResource.id, resourceData);
+    } else {
+      await addResourceToDB(resourceData);
+    }
+    setEditingResource(null);
   };
 
   const handleDeleteResource = async (id: string) => {
@@ -201,8 +216,9 @@ const MainApp: React.FC = () => {
                 <ResourceCard 
                   key={resource.id} 
                   resource={resource} 
-                  isEditing={isAdmin} // Solo los admin pueden borrar
+                  isEditing={isAdmin} // Pasamos isAdmin para habilitar botones
                   onDelete={handleDeleteResource}
+                  onEdit={handleEditClick}
                 />
               ))}
           </div>
@@ -245,7 +261,8 @@ const MainApp: React.FC = () => {
       <AddResourceModal 
         isOpen={isModalOpen} 
         onClose={() => setIsModalOpen(false)} 
-        onAdd={handleAddResource}
+        onSave={handleSaveResource}
+        initialData={editingResource}
       />
 
     </div>

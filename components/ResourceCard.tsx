@@ -1,29 +1,46 @@
 import React from 'react';
-import { ExternalLink, Star, Trash2 } from 'lucide-react';
+import { ExternalLink, Star, Trash2, Edit2 } from 'lucide-react';
 import { Resource } from '../types';
 
 interface ResourceCardProps {
   resource: Resource;
   isEditing?: boolean;
   onDelete?: (id: string) => void;
+  onEdit?: (resource: Resource) => void;
 }
 
-const ResourceCard: React.FC<ResourceCardProps> = ({ resource, isEditing, onDelete }) => {
+const ResourceCard: React.FC<ResourceCardProps> = ({ resource, isEditing, onDelete, onEdit }) => {
   return (
     <div className={`group relative bg-white rounded-2xl overflow-hidden border transition-all duration-300 flex flex-col h-full ${isEditing ? 'border-indigo-300 ring-2 ring-indigo-100' : 'border-slate-200 hover:border-indigo-300 hover:shadow-xl'}`}>
       
       {/* Edit Mode Actions */}
-      {isEditing && onDelete && (
-        <button 
-          onClick={(e) => {
-            e.preventDefault();
-            onDelete(resource.id);
-          }}
-          className="absolute top-3 left-3 z-30 bg-red-500 text-white p-2 rounded-full shadow-lg hover:bg-red-600 transition-colors"
-          title="Eliminar recurso"
-        >
-          <Trash2 size={16} />
-        </button>
+      {isEditing && (
+        <div className="absolute top-3 left-3 z-30 flex gap-2">
+          {onEdit && (
+            <button 
+              onClick={(e) => {
+                e.preventDefault();
+                onEdit(resource);
+              }}
+              className="bg-indigo-600 text-white p-2 rounded-full shadow-lg hover:bg-indigo-700 transition-colors"
+              title="Editar recurso"
+            >
+              <Edit2 size={16} />
+            </button>
+          )}
+          {onDelete && (
+            <button 
+              onClick={(e) => {
+                e.preventDefault();
+                onDelete(resource.id);
+              }}
+              className="bg-red-500 text-white p-2 rounded-full shadow-lg hover:bg-red-600 transition-colors"
+              title="Eliminar recurso"
+            >
+              <Trash2 size={16} />
+            </button>
+          )}
+        </div>
       )}
 
       {/* Featured Badge */}
@@ -41,6 +58,7 @@ const ResourceCard: React.FC<ResourceCardProps> = ({ resource, isEditing, onDele
           src={resource.imageUrl} 
           alt={resource.title} 
           className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500"
+          onError={(e) => { (e.target as HTMLImageElement).src = 'https://picsum.photos/400/200?blur=2'; }}
         />
         <div className="absolute bottom-3 left-3 z-20">
           <span className="inline-block bg-white/90 backdrop-blur-sm text-indigo-900 text-[10px] font-bold px-2 py-1 rounded-md uppercase tracking-wide">

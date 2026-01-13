@@ -46,6 +46,38 @@ const Concierge: React.FC<ConciergeProps> = ({ resources }) => {
     }
   };
 
+  // Función simple para renderizar texto con enlaces Markdown [Texto](URL)
+  const renderMessageContent = (text: string, isUser: boolean) => {
+    // Regex para capturar [texto](url)
+    const parts = text.split(/(\[.*?\]\(.*?\))/g);
+    
+    return (
+      <span className="whitespace-pre-wrap">
+        {parts.map((part, i) => {
+          const match = part.match(/\[(.*?)\]\((.*?)\)/);
+          if (match) {
+            return (
+              <a 
+                key={i} 
+                href={match[2]} 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className={`font-bold underline decoration-2 underline-offset-2 transition-colors ${
+                  isUser 
+                    ? 'text-white decoration-white/50 hover:decoration-white' 
+                    : 'text-indigo-600 decoration-indigo-200 hover:decoration-indigo-600'
+                }`}
+              >
+                {match[1]}
+              </a>
+            );
+          }
+          return part;
+        })}
+      </span>
+    );
+  };
+
   return (
     <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end pointer-events-none">
       {/* Chat Window */}
@@ -80,7 +112,7 @@ const Concierge: React.FC<ConciergeProps> = ({ resources }) => {
                     : 'bg-white text-slate-700 border border-slate-200 rounded-bl-none'
                 }`}
               >
-                {msg.text}
+                {renderMessageContent(msg.text, msg.role === 'user')}
               </div>
             </div>
           ))}

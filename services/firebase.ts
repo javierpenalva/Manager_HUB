@@ -12,6 +12,7 @@ import {
   collection, 
   addDoc, 
   deleteDoc, 
+  updateDoc,
   doc, 
   onSnapshot, 
   query, 
@@ -115,6 +116,21 @@ export const addResourceToDB = async (resource: Omit<Resource, 'id'>) => {
     return;
   }
   await addDoc(collection(db, 'resources'), resource);
+};
+
+export const updateResourceInDB = async (id: string, resource: Partial<Resource>) => {
+  if (!db || localStorage.getItem('mockUser')) {
+    const stored = localStorage.getItem('edtech-resources');
+    if (stored) {
+      const current = JSON.parse(stored) as Resource[];
+      const updated = current.map(r => r.id === id ? { ...r, ...resource } : r);
+      localStorage.setItem('edtech-resources', JSON.stringify(updated));
+      window.dispatchEvent(new Event('storage'));
+    }
+    return;
+  }
+  const docRef = doc(db, 'resources', id);
+  await updateDoc(docRef, resource);
 };
 
 export const deleteResourceFromDB = async (id: string) => {

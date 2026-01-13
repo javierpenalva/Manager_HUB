@@ -1,4 +1,4 @@
-export type Category = 'Todos' | 'IA Generativa' | 'Diseño' | 'Productividad' | 'Evaluación' | 'Multimedia';
+export type Category = 'Todos' | 'IA Generativa' | 'Diseño' | 'Multimedia' | 'VR/AR' | 'Simulaciones' | 'Impresión 3D';
 
 export interface Resource {
   id: string;
