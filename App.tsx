@@ -156,8 +156,8 @@ const MainApp: React.FC = () => {
                   key={category}
                   onClick={() => setActiveCategory(category)}
                   className={`px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 flex items-center gap-2 ${activeCategory === category
-                      ? 'bg-indigo-600 text-white shadow-md transform scale-105'
-                      : 'text-slate-600 hover:bg-slate-100 hover:text-indigo-600'
+                    ? 'bg-indigo-600 text-white shadow-md transform scale-105'
+                    : 'text-slate-600 hover:bg-slate-100 hover:text-indigo-600'
                     }`}
                 >
                   {category === 'Todos' && <LayoutGrid size={16} />}
@@ -246,7 +246,7 @@ const MainApp: React.FC = () => {
 
       <footer className="mt-20 border-t border-slate-200 bg-white py-12 relative">
         <div className="max-w-7xl mx-auto px-4 text-center">
-          <p className="text-slate-500 text-sm mb-2">© 2024 Plataforma de Formación Docente.</p>
+          <p className="text-slate-500 text-sm mb-2">© 2024 Javier Penalva.</p>
           <div className="flex justify-center items-center gap-2 text-xs text-slate-400">
             <span>Manager HUB</span>
             <span>•</span>
